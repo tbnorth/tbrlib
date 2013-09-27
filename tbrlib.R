@@ -50,3 +50,59 @@ read_hash = function(filename) {
     show(paste(nrow(ans), ’records:’, paste(names(ans), collapse=’ ’)))
     return(ans)
 }
+
+
+summarize = function(dframe, exclude=c(), maxlen=12) {
+    # more compact summary() output
+    factors = data.frame()
+    reals = data.frame()
+    for (i in names(dframe)) {
+        if (i %in% exclude) 
+            next
+        j = dframe[[i]]
+        na = sum(is.na(j))
+        j = j[!is.na(j)]
+        if (is.factor(j)) { 
+            l = levels(j)
+            lvls = length(l)
+            if (lvls == 0) {
+                min=NA
+                max=NA
+            } else {
+                min=substr(l[1], 1, maxlen)
+                max=substr(tail(l,1), 1, maxlen)
+            }
+            ord = ""
+            if (is.ordered(j)) {
+                ord = "Y"
+            }
+            row = data.frame(name=i, min=factor(min), max=factor(max),
+                             levels=lvls, na=na, ord=ord)
+            factors = rbind(factors, row)
+        } else {        
+            row = data.frame(name=i, min=min(j), max=max(j), mean=mean(j), sd=sd(j), na=na)
+            reals = rbind(reals, row)
+        }
+    }
+    return(list(factors=factors, reals=reals))
+}
+
+viewh = function(x) {
+    # view x in system web-browser
+    argname = as.character(substitute(x))
+    fname = paste("/tmp/Rview.", sample(1:1000000, 1), ".xhtml", sep='')
+    sink(fname)
+    # use XHTML to allow use of CDATA so '<', '&' etc. display ok
+    cat('<?xml version="1.0" encoding="UTF-8"?>\n',
+        '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"\n',
+        '  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">\n',
+        '<html xmlns="http://www.w3.org/1999/xhtml" >\n',
+        '<head><title>', argname, "</title></head><body>\n",
+        "<h1 style='margin:0'>",argname, '</h1><div>', date(),
+        "</div>\n<pre><![CDATA[")
+    print(x)
+    cat("]]></pre></body></html>")
+    sink()
+    system(paste('x-www-browser', fname, '&'))
+}
+
