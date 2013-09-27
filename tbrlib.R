@@ -77,14 +77,16 @@ summarize = function(dframe, exclude=c(), maxlen=12) {
                 ord = "Y"
             }
             row = data.frame(name=i, min=factor(min), max=factor(max),
-                             levels=lvls, na=na, ord=ord)
+                             levels=lvls, vals=nrow(dframe)-na, na=na, 
+                             unique=length(unique(j))==length(j), ord=ord)
             factors = rbind(factors, row)
         } else {        
             row = data.frame(name=i, min=min(j), max=max(j), mean=mean(j), sd=sd(j), na=na)
             reals = rbind(reals, row)
         }
     }
-    return(list(factors=factors, reals=reals))
+    return(list(info=paste(nrow(dframe), 'rows', length(dframe), 'columns'),
+                'factors/characters'=factors, reals=reals))
 }
 
 viewh = function(x) {
