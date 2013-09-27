@@ -90,7 +90,7 @@ summarize = function(dframe, exclude=c(), maxlen=12) {
 viewh = function(x) {
     # view x in system web-browser
     argname = as.character(substitute(x))
-    argname = sub('^summarize ', '', argname)  # optimize for viewh(summarize(foo))
+    argname = sub('^\\s*summarize ', '', argname)  # optimize for viewh(summarize(foo))
     fname = paste("/tmp/Rview.", sample(1:1000000, 1), ".xhtml", sep='')
     sink(fname)
     # use XHTML to allow use of CDATA so '<', '&' etc. display ok
