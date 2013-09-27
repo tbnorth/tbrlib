@@ -47,7 +47,7 @@ read_hash = function(filename) {
     # read csv file, but show name_digest() and records / fields
     show(name_digest(filename))
     ans = read.csv(filename)
-    show(paste(nrow(ans), ’records:’, paste(names(ans), collapse=’ ’)))
+    show(paste(nrow(ans), 'records:', paste(names(ans), collapse=' ')))
     return(ans)
 }
 
