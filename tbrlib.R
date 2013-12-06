@@ -109,3 +109,16 @@ viewh = function(x) {
     system(paste('x-www-browser', fname, '&'))
 }
 
+join <- function(to, from, to_col, from_col, copy_cols) {
+    # copy columns named in vector `copy_cols` into `to` from
+    # `from` where `to$to_col` == `from$from_col`
+    # like merge(), but without eating all available RAM
+    matches = to[, to_col] %in% from[, from_col]
+    for (col in copy_cols) {
+        to[matches, col] <- 
+            from[match(to[matches, to_col], from[, from_col]), col]
+    }
+    return(to)
+}
+
+
