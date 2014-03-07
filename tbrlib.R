@@ -1,6 +1,7 @@
 get_login = function(URL, username, password) {
     # login to a server which does its own login, not just HttpAuth
     # works with Django and HTTPS connections
+    # e.g. curl = get_login("https://server.com/accounts/login/", "myname", "xxx")
     # returns a CURLHandle to use in subsequent RCurl calls
     require(RCurl)
     require(XML)
