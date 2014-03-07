@@ -1,26 +1,42 @@
-get_login = function(URL, username, password) {
+get_login = function(URL, username, password, curl=NULL,
+                     uname='username', pname='password', getpage=FALSE) {
     # login to a server which does its own login, not just HttpAuth
     # works with Django and HTTPS connections
     # e.g. curl = get_login("https://server.com/accounts/login/", "myname", "xxx")
     # returns a CURLHandle to use in subsequent RCurl calls
+    # `curl` - pass in a previous return value from get_login() to
+    #          log in to multiple sites
+    # `uname` - change if the username field in the form is not named 'username'
+    # `pname` - change if the password field in the form is not named 'password'
+    # `getpage` - TRUE if you need to load the login page to get cookies etc.
+    #             before filling in the form, use getpage=TRUE for Django
     require(RCurl)
     require(XML)
 
     # get a curl handle with some settings set
     # `autoreferer` insufficient, see explicit setting below
-    curl = curlSetOpt(cookiejar='', followlocation=TRUE)
-    
-    # load the page
-    html = getURLContent(URL, curl=curl)
-    dom = htmlTreeParse(html, useInternalNodes=TRUE)
-    # and check for a Django CSRF token
-    token = getNodeSet(dom, "//*[@name='csrfmiddlewaretoken']/@value")[[1]]
-    
-    params = list('username'=username, 'password'=password)
-    if (!is.null(token)) {
-        params = c(params, list('csrfmiddlewaretoken'=as.character(token)))
+    if (is.null(curl)) {
+        # cookiejar='' enables cookies
+        curl = curlSetOpt(cookiejar='', followlocation=TRUE)
     }
     
+    if (getpage) {
+        # load the page
+        html = getURLContent(URL, curl=curl)
+        dom = htmlTreeParse(html, useInternalNodes=TRUE)
+        # and check for a Django CSRF token
+        token = getNodeSet(dom, "//*[@name='csrfmiddlewaretoken']/@value")[[1]]
+    } else {
+        token = NULL
+    }
+    
+    params = list(username, password)
+    names(params) = c(uname, pname)
+    if (!is.null(token)) {
+        params['csrfmiddlewaretoken'] = as.character(token)
+    }
+    
+    # html will be whatever page you get after logging in, irrelevant
     html = postForm(URL, curl=curl, style="POST", 
                     .params=params, .opts=list(referer=URL)) 
     return(curl)
