@@ -52,9 +52,15 @@ onetri = function(x, hide=upper.tri) {
     print(xx, na.print='')
 }
 
-normalize = function(x) {
+normalize = function(x, minx=NA, maxx=NA) {
     # scale vector x into a 0-1 range
-    return( (x-min(x)) / (max(x)-min(x)) ) 
+    if (is.na(minx)) {
+        minx = min(x)
+    }
+    if (is.na(maxx)) {
+        maxx = max(x)
+    }
+    return( (x-minx) / (maxx-minx) ) 
 }
 
 require(digest);
