@@ -1,3 +1,30 @@
+get_login = function(URL, username, password) {
+    # login to a server which does its own login, not just HttpAuth
+    # works with Django and HTTPS connections
+    # returns a CURLHandle to use in subsequent RCurl calls
+    require(RCurl)
+    require(XML)
+
+    # get a curl handle with some settings set
+    # `autoreferer` insufficient, see explicit setting below
+    curl = curlSetOpt(cookiejar='', followlocation=TRUE)
+    
+    # load the page
+    html = getURLContent(URL, curl=curl)
+    dom = htmlTreeParse(html, useInternalNodes=TRUE)
+    # and check for a Django CSRF token
+    token = getNodeSet(dom, "//*[@name='csrfmiddlewaretoken']/@value")[[1]]
+    
+    params = list('username'=username, 'password'=password)
+    if (!is.null(token)) {
+        params = c(params, list('csrfmiddlewaretoken'=as.character(token)))
+    }
+    
+    html = postForm(URL, curl=curl, style="POST", 
+                    .params=params, .opts=list(referer=URL)) 
+    return(curl)
+}
+
 # make a||b shorthand for paste(a,b,sep='')
 "||" <- function(...) UseMethod("||")
 "||.default" <- .Primitive("||")
