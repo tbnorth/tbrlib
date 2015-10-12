@@ -171,4 +171,20 @@ join <- function(to, from, to_col, from_col, copy_cols) {
     return(to)
 }
 
+identify_all <- function(data, x, y = NULL, closest = 10) {
+    # show lines from data.frame near clicked point on plot
+    if (is.null(y)) {
+        y <- x[,2]
+        x <- x[,1]
+    }
+
+    rn <- identify(x, y, n=1)
+    data$id.d.x <- x - x[rn]
+    data$id.d.y <- y - y[rn]
+    nx <- (x-min(x)) / (max(x)-min(x))
+    ny <- (y-min(y)) / (max(y)-min(y))
+    distance <- sqrt((nx-nx[rn])**2 + (ny-ny[rn])**2)
+    data <- data[order(distance, y, x),]
+    show(data[1:closest,])
+}
 
